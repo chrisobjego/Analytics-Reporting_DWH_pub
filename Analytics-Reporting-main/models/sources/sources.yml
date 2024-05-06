@@ -1,0 +1,84 @@
+version: 2
+
+sources:
+  - name: chargebee
+    database: analytics2poc
+    schema: chargebee_product_catalog_2
+    tables:
+      - name: subscription
+      - name: invoice
+      - name: invoice_line_item     
+      - name: invoice_discount
+
+  - name: google_analytics_4
+    database: analytics2poc
+    schema: google_analytics_4
+    tables:
+    - name: ga_4_sourcemediumcampaign
+
+  - name: google_universal_analytics
+    database: analytics2poc
+    schema: google_universal_analytics
+    tables:
+    - name: user_id_signup_records
+
+  - name: postgres
+    database: analytics2poc
+    schema: postgres_tables
+    tables:
+      - name: DB_Objego_user
+      - name: DB_Rental_Contract
+      - name: DB_Rental_Objects
+      - name: DB_OCB
+
+  - name: google_ads
+    database: analytics2poc
+    schema: google_ads_google_ads
+    tables:
+    - name: google_ads__ad_group_report
+
+  - name: meta_ads
+    database: analytics2poc
+    schema: facebook_ads
+    tables:
+    - name: meta_ads_cost
+
+  - name: microsoft_ads
+    database: analytics2poc
+    schema: bingads_microsoft_ads
+    tables:
+    - name: microsoft_ads__ad_group_report    
+
+  - name: outbrain_ads
+    database: analytics2poc
+    schema: outbrain_ads
+    tables:
+    - name: campaign_report      
+
+  - name: affiliates
+    database: analytics2poc
+    schema: Affiliates
+    tables:
+    - name: Adcell_Data     
+    - name: Adcell_cost 
+         
+
+  - name: Google_Sheet_coop
+    database: analytics2poc
+    schema: Objego_Google_Sheet
+    tables:
+    - name: Demand cost        
+
+  - name: Google_Sheet_demand
+    database: analytics2poc
+    schema: Objego_Google_Sheet
+    tables:
+    - name: Demand cost   
+
+  - name: hubspot
+    database: analytics2poc
+    schema: hubspotzzz
+    tables:      
+      - name: email_campaign
+      - name: contact
+      - name: email_event     

@@ -1,0 +1,308 @@
+version: 2
+
+models:
+  - name: metric_mart_daily
+    description: "This table stores measures information about our users. "
+    columns:
+      - name: user_id 
+        description: "Unique identifier for each user."
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]   
+          - relationships:
+              to: ref('dim_registration')
+              field: user_id     
+
+      - name: signup_date 
+        description: "Date when the user signed up. Null if 'not_tracked'. Not all users are tracked for 
+                      signup as the source (GA4) limits tracking by user contest."      
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]  
+          - date_is_past 
+
+      - name: registration_date 
+        description: "Date when the user's registration was recorded"      
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]  
+          - date_is_past 
+
+
+      - name: last_login_date 
+        description: "Date of the user's last login. Can be intrepreted as 'last seen'"      
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past    
+
+      - name: login_count 
+        description: "Number of times the user has logged in." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]      
+
+      - name: campaign
+        description: "Campaign associated with the user's signup, defaulting to 'not_tracked' if not available. sourced from GA4 and credited to users via data driven model." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]     
+
+
+      - name: source_medium
+        description: " Source and medium of the user's signup, defaulting to 'not_tracked' if not available. Sourced from GA4 and credited to users via data driven model." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]     
+ 
+
+      - name: created_object
+        description: " Boolean indicating if an object was created by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean]     
+               
+      - name: first_object_creation_date 
+        description: " Date when the user created their first object. Null if user has not created an object."      
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past                 
+
+      - name: object_count 
+        description: "Total count of objects created by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+
+      - name: multi_family_house 
+        description: "Count of multi-family houses associated with the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]      
+
+      - name: one_family_house 
+        description: "Count of single-family houses associated with the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+
+      - name: other_objects 
+        description: " Count of other objects associated with the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+
+      - name: unit_count 
+        description: "Total count of units associated with the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]    
+
+      - name: created_contract
+        description: "Boolean indicating if a contract was created by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean]  
+
+      - name: first_rental_contract_date 
+        description: "Date when the user created their first rental contract. Null if user has not created a contract."      
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past   
+
+      - name: rental_contracts_count 
+        description: "Total count of rental contracts created by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]  
+
+      - name: activated
+        description: "Boolean indicating if the user was activated within 30 days of registration" 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean]  
+
+      - name: days_btw_reg_act 
+        description: "Number of days between registration and activation.Null if user has nit created a contract." 
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+
+      - name: Last_email_b4_activated 
+        description: "The last email the user open within 7 days prior to activation. Defaulting to 'did_not_open_in7days'."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string] 
+
+      - name: Last_email_subject_b4_activated 
+        description: "The last email subject the user open within 7 days prior to activation. Defaulting to 'did_not_open_in7days'."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+
+      - name: Last_email_b4_subscribing 
+        description: "The last email the user open within 7 days prior to subscribing. Defaulting to 'did_not_open_in7days'."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]    
+
+      - name: Last_email_subject_b4_subscribing 
+        description: "The last email subject the user open within 7 days prior to subscribing. Defaulting to 'did_not_open_in7days'."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]                                          
+             
+
+      - name: subscriber
+        description: "Boolean indicating if the user is a paying user(PU)." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean] 
+
+      - name: first_invoice_date 
+        description: "Date of the user's first invoice. Can be intrepreted as 'Date the user became a PU. Null if not a pay user."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past 
+
+      - name: current_status 
+        description: "Current status of the user, defaulting to 'starters' if not a Pay user."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string] 
+          - accepted_values:
+              values: ['starters', 'active', 'non_renewing', 'cancelled']    
+
+      - name: current_package 
+        description: "Current package subscribed by the user, defaulting to 'starters' if not a pay users."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string] 
+          - accepted_values:
+              values: ['basic-EUR-Yearly', 'premium-EUR-Yearly', 'basic-EUR-Every-3-months', 'premium-EUR-Every-3-months', 'starters']                  
+
+      - name: renewal_counts 
+        description: " Total count of renewals by the user.This metric is measureed for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]               
+
+      - name: count_basic_3 
+        description: "Count of 3 months basic packages subscribed  by the pay user.This metric is measureed for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]              
+
+      - name: count_premium_3 
+        description: "Count of 3 months premium packages subscribed  by the pay user.This metric is measureed for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+
+      - name: count_basic_12 
+        description: "Count of 12 months basic packages subscribed  by the pay user.This metric is measureed for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]  
+
+      - name: mrr 
+        description: "Monthly recurring revenue by the pay user.This metric is measured for only active subscribers." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]  
+
+      - name: total_revenue 
+        description: "Total revenue by a pay user.This metric is measureed for all subscribers and for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]                
+
+      - name: count_premium_12 
+        description: "Count of 12 months premium packages subscribed  by the pay user.This metric is measureed for only invoice status is paid." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]                
+
+      - name: new_existing 
+        description: "Indicates if the user is new (became a pay user in same month of registration) or 
+                      existing (became a pay user in months after registration), defaulting to 'starters' if not a pay user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]   
+          - accepted_values:
+              values: ['new', 'exist','starters']  
+
+      - name: churn_date 
+        description: "Date of user churn. Null if user is a 'starters' or not a pay user."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past                                                                         
+
+      - name: schedule_churn_date 
+        description: "Date of scheduled churn. Null if user is a 'starters' or not a pay user."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_in_future 
+
+      - name: created_ocb
+        description: "Boolean indicating if a OCB(Operationg cost billing) was performed by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean]                     
+
+      - name: ocb_count 
+        description: "Total count of OCBs performed by the user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]       
+
+      - name: cpr 
+        description: "Cost per registration associated to the user. Calculated at the point of registration." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]    
+
+      - name: cppu 
+        description: "Cost per pay user associated to the user. Calculated at the point of being a Pay user." 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]                                   

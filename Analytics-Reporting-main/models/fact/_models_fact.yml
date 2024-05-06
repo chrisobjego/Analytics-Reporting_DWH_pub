@@ -1,0 +1,307 @@
+version: 2
+
+models:
+  - name: dim_activated_user
+    description: "This table stores descriptive information about activated users-users that created a rental contract within 30 days of signup"
+    columns:
+      - name: user_id 
+        description: "The unique id for the table"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]   
+          - relationships:
+              to: ref('prep_activation')
+              field: user_id              
+      - name: registration_date 
+        description: "The date the user performed DOI. Varies from Signup date but is mostly the same"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]  
+          - date_is_past                                 
+      - name: activation_date 
+        description: "The first time the user created a rental contract after registration"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date] 
+          - date_is_past              
+      - name: time_to_convert_hours
+        description: "No. of hours between registration and first rental contract created" 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]                                   
+      - name: time_to_convert_days
+        description: "No. of days between registration and first rental contract created" 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]     
+
+  - name: dim_invoice
+    description: "This table stores descriptive information about invoices. A subscription can have many invoices"
+    columns:
+      - name: invoice_id 
+        description: "The unique id for the dim_invoice table"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - relationships:
+              to: ref('prep_invoice')
+              field: invoice_id                 
+                                  
+      - name: first_invoice 
+        description: "A boolean field that is true if an invoice_id is the first invoice attached to a subscription and false when it is not"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [boolean] 
+      - name: invoice_status 
+        description: "This captures the status of an invoice for example - paid, not paid, voided etc"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - accepted_values:
+              values: ['paid', 'voided', 'not_paid', 'payment_due']              
+      - name: plan 
+        description: "This describes the 2 possible plan a subscription can have for example - basic and premium"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - accepted_values:
+              values: ['Basic', 'Premium'] 
+      - name: duration 
+        description: "This describes the 2 possible durations a subscription can have for example - quarterly and yearly"
+        tests:     
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]     
+          - accepted_values:
+              values: ['Yearly', 'Quarterly'] 
+      - name: package 
+        description: "A combination of subscription plan and duration. it has 4 possible values - basic_yearly, basic_quarterly, premium_yearly, premium_quarterly"
+        tests:     
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]
+          - accepted_values:
+              values: ['basic-EUR-Yearly', 'premium-EUR-Yearly', 'basic-EUR-Every-3-months', 'premium-EUR-Every-3-months'] 
+
+      - name: discounted_mrr 
+        description: "The mrr for subscriptions prchased with vouchers"
+        tests:     
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]
+
+  - name: dim_ocb_creation
+    description: "This table stores descriptive information about OCBs. A user can create many OCBs"
+    columns:
+      - name: DB_entry_id 
+        description: "This is the unique key for the ocb table.. to be renamed to ocb_key"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - relationships:
+              to: ref('prep_ocb')
+              field: DB_entry_id       
+
+  - name: dim_subscription
+    description: "This table stores measures about subscriptions"
+    columns:
+      - name: subscription_id 
+        description: "It is a unique identifier for users in the dim_subscription table"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - relationships:
+              to: ref('prep_subscription')
+              field: subscription_id      
+
+      - name: mrr 
+        description: "Similar to the invoice_id, it is a unique identifier for invoices in the fact_subscription table"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [float64]      
+
+  - name: fact_signup
+    description: "This table answers the question, how many signups we had in x time"
+    columns:
+      - name: date 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]
+          - relationships:
+              to: ref('prep_dim_user_signup')
+              field: Signup_date                   
+      - name: user_id 
+        description: "Similar to the user_id, it is a unique identifier for users in the fact_signup table. To be renamed to user_key"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]   
+          - relationships:
+              to: ref('prep_dim_user_signup')
+              field: user_id                      
+      - name: signup_count 
+        description: "This counts the number of signup per user. Expected to be 1"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64] 
+          - accepted_values:
+              values: [1] 
+              quote: false                   
+
+  - name: fact_rental_object_creation
+    description: "This fact table handles measures about the portfolio of users ir objects and units"
+    columns:
+      - name: object_id 
+        description: "unique identifier for the dimension rental_object_creation"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]
+          - relationships:
+              to: ref('prep_rental_object_creation')
+              field: object_id                       
+      - name: user_id 
+        description: "  "
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]    
+          - relationships:
+              to: ref('prep_rental_object_creation')
+              field: user_id 
+      - name: object_creation_date 
+        description: "The date the customer created the object"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]     
+          - date_is_past 
+     
+  - name: contract_id
+    description: "This is the table that captures the measures about rental contracts"
+    columns:
+      - name: rental_contract_key 
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - relationships:
+              to: ref('prep_rental_contract')
+              field: contract_id 
+
+      - name: user_id 
+        description: "Unique identifier for a user"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]  
+          - relationships:
+              to: ref('prep_rental_contract')
+              field: user_id        
+
+      - name: contract_creation_date 
+        description: "The date the customer created a rental contract"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]                              
+  
+  - name: fact_registration
+    description: "Captures measures about user registrations"
+    columns:
+      - name: user_id 
+        description: "This is the unique key for the registration field"
+        tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]          
+          - relationships:
+              to: ref('prep_registration')
+              field: user_id
+      - name: registration_count
+        description: "This is the number of registrations a customer has, Ideally should be 1" 
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+          - accepted_values:
+              values: [1] 
+              quote: false
+
+  - name: fact_ocb_creation
+    description: "This fact table gives us measures about OCB created"
+    columns:
+      - name: DB_entry_id 
+        description: "Unique identifier for the OCB creation fact table"
+        tests:
+          - unique
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string] 
+      - name: user_id
+        description: "Unique identifier for a customer"   
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]                            
+      - name: ocb_creation_date 
+        description: "The date the customer created an OCB"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]   
+         
+
+  - name: fact_activation
+    description: "This fact table captures measures about activation"
+    columns:             
+      - name: user_id 
+        description: "Unique identifier for every customer"
+        tests:
+          - not_null   
+          - unique       
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [string]     
+          - relationships:
+              to: ref('prep_registration')
+              field: user_id 
+      - name: activation_date 
+        description: "The date the customer created their first rental contract"
+        tests:
+          - not_null           
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [date]   
+          - date_is_past
+      - name: rental_contract_count 
+        description: "This is the count of rental contracts created by a customer"
+        tests:
+          - not_null           
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64] 
+      - name: time_to_convert_days 
+        description: "The number of days between registration and creation of the first rental contract"
+        tests:
+          - not_null          
+          - dbt_expectations.expect_column_values_to_be_in_type_list:
+              column_type_list: [int64]           
+
+
+
