@@ -3,10 +3,12 @@
 Since the foundation of the company, we relied on external tools for data-analytic activities (Googe Analytics, Mixpanel, etc.). This was fine for the beginning but may become a potential risk/dependency going forward since we are always tied to the specific providers and the availability of their service.
 Moreover, we are more and more facing restrictions when we want to analyze the user-journey end-to-end where we nowadays have different tools in place (GA for the top of the funnel; Mixpanel for Product)
 Mid-to long-term we also might have to dig deeper into analyzing the data our users are capturing in company to provide additional services on top (e.g. energy consumption benchmarking)
+
 Additionally,
 •	We get different results per metric per data source.
 •	The data in the reporting dashboard are not fully automated.
 •	Manual and laborious analytic process for the data team
+
 Based on this, we have the following objectives
 •	Improve Data Quality: By extracting data from various sources and transforming it into a consistent format, the data quality will be improved, resulting in more accurate analysis and decision-making.
 •	Enable Data-Driven Decisions: With a centralized data warehouse, the organization can make data-driven decisions based on real-time information, which can lead to improved business outcomes.
