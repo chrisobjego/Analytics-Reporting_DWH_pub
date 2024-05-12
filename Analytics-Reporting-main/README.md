@@ -69,3 +69,9 @@ Assumptions: All our data sources can integrate with the chosen data warehouse
 Constraints: Budget, timeline, capacity
 
 
+## Read Next:
+
+1 - Work Process Documentation
+
+2 - ETL Architecture
+
